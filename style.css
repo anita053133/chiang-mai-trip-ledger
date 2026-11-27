@@ -70,6 +70,7 @@ label{font-size:14px}
 .scope button[aria-pressed="true"]{background:var(--n);color:#fff}
 .amount .btn{display:block;margin:5px 0 0 auto}
 .itinerary small{font-size:14px}
+.entry-day{margin-bottom:11px}
 .syncbox button{white-space:nowrap}
 .negative{color:#b43b30!important}
 @media(max-width:520px){

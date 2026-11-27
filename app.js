@@ -306,12 +306,14 @@ async function deleteExpense(row, button) {
   }
 }
 
-function setDay(day) {
+function setDay(day, revealDayButton = false) {
   activeDay = day;
   el('day').value = String(day);
   try { writeLocal('day', day); } catch {}
   render();
-  el('dayButtons').querySelector('.active')?.scrollIntoView({block: 'nearest', inline: 'nearest', behavior: 'instant'});
+  if (revealDayButton) {
+    el('dayButtons').querySelector('.active')?.scrollIntoView({block: 'nearest', inline: 'nearest', behavior: 'instant'});
+  }
 }
 
 async function saveRate(event) {
@@ -401,7 +403,7 @@ function render() {
     const button = textNode('button', 'DAY ' + day + '｜' + thb(dayTotal), 'daybtn' + (day === activeDay ? ' active' : ''));
     button.type = 'button';
     button.setAttribute('aria-pressed', String(day === activeDay));
-    button.addEventListener('click', () => setDay(day));
+    button.addEventListener('click', () => setDay(day, true));
     return button;
   }));
   listDays.scrollLeft = scroll;
@@ -527,6 +529,7 @@ el('publicScope').addEventListener('click', () => selectScope('public'));
 el('personalScope').addEventListener('click', () => selectScope('personal'));
 el('ledgerMember').addEventListener('change', render);
 el('filterCategory').addEventListener('change', render);
+el('day').addEventListener('change', () => setDay(Number(el('day').value)));
 el('kind').addEventListener('change', updateKind);
 el('refresh').addEventListener('click', () => synchronize(true));
 el('entry').addEventListener('submit', addExpense);

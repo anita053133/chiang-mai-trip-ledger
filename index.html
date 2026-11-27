@@ -58,8 +58,9 @@
         <section class="card">
           <h2 id="entryTitle">新增公款支出</h2>
           <form id="entry">
+            <div class="entry-day"><label for="day">日期／行程日</label><select id="day" required></select></div>
+            <div class="itinerary" id="itinerary" aria-live="polite"></div>
             <div class="form">
-              <div><label for="day">日期／行程日</label><select id="day" required></select></div>
               <div><label for="kind">類型</label><select id="kind"><option value="expense">支出</option><option value="initial">初始投入</option><option value="topup">追加公款</option></select></div>
               <div id="categoryField"><label for="category">分類</label><select id="category"></select></div>
               <div class="full"><label for="title" id="titleLabel">支出項目</label><input id="title" maxlength="80" placeholder="例如：夜市晚餐" required></div>
@@ -79,7 +80,6 @@
         <section class="card">
           <div class="toolbar"><h2 style="margin:0">每日明細</h2><select id="filterCategory" aria-label="篩選分類"><option value="">全部分類</option></select></div>
           <div class="days" id="dayButtons" aria-label="行程日"></div>
-          <div class="itinerary" id="itinerary"></div>
           <div class="list" id="expenseList"></div>
           <div class="actions">
             <button type="button" class="btn secondary" id="export">匯出 CSV 備份</button>
