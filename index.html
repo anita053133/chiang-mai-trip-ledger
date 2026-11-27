@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#18a6a0">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>清邁八天七夜｜旅行記帳</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./config.js" defer></script>
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <header><h1>🌿 清邁八天七夜｜旅行記帳</h1><p>2026/11/28－12/05・四人共用雲端版</p></header>
+  <main class="wrap">
+    <section class="card syncbox" aria-label="雲端同步">
+      <div class="status" aria-live="polite">
+        <span id="cloudBadge" class="badge">尚未同步</span>
+        <span id="pendingBadge" class="badge warn" hidden></span>
+        <span id="lastSync" class="note"></span>
+      </div>
+      <button type="button" class="btn secondary" id="refresh">重新整理</button>
+    </section>
+    <p class="note">四位旅伴可用同一條邀請連結開啟帳本。個人帳可依付款人查看。</p>
+    <div class="scope" aria-label="帳本">
+      <button type="button" class="btn secondary" id="publicScope" aria-pressed="true">公款</button>
+      <button type="button" class="btn secondary" id="personalScope" aria-pressed="false">個人</button>
+    </div>
+    <section class="card">
+      <div class="toolbar">
+        <h2 style="margin:0" id="summaryTitle">公款支出總覽</h2>
+        <div id="memberFilter" hidden><label for="ledgerMember">查看個人帳</label><select id="ledgerMember"></select></div>
+      </div>
+      <div class="summary">
+        <div class="metric">總支出（泰銖）<b id="sumThb">฿0</b></div>
+        <div class="metric">換算台幣<b id="sumTwd">NT$0</b></div>
+        <div class="metric">支出筆數<b id="count">0</b></div>
+        <div class="metric">平均每日<b id="avgDay">฿0</b></div>
+      </div>
+    </section>
+    <section class="card section-gap" id="fundCard">
+      <div class="toolbar">
+        <h2 style="margin:0">公款餘額</h2>
+        <button type="button" class="btn secondary" id="fundEntry">記錄投入／追加</button>
+      </div>
+      <div class="summary">
+        <div class="metric">初始投入<b id="initial">฿0</b></div>
+        <div class="metric">追加公款<b id="topup">฿0</b></div>
+        <div class="metric">已花費<b id="spent">฿0</b></div>
+        <div class="metric">剩餘公款<b id="balance">฿0</b></div>
+      </div>
+      <p class="note">公款以泰銖彙總。台幣紀錄會依下方共用匯率換算。</p>
+      <div id="memberContributions" class="note"></div>
+    </section>
+    <div class="grid section-gap">
+      <div>
+        <section class="card">
+          <h2 id="entryTitle">新增公款支出</h2>
+          <form id="entry">
+            <div class="form">
+              <div><label for="day">日期／行程日</label><select id="day" required></select></div>
+              <div><label for="kind">類型</label><select id="kind"><option value="expense">支出</option><option value="initial">初始投入</option><option value="topup">追加公款</option></select></div>
+              <div id="categoryField"><label for="category">分類</label><select id="category"></select></div>
+              <div class="full"><label for="title" id="titleLabel">支出項目</label><input id="title" maxlength="80" placeholder="例如：夜市晚餐" required></div>
+              <div><label for="amount">金額</label><input id="amount" type="number" inputmode="decimal" min="0.01" max="100000000" step="0.01" placeholder="0" required></div>
+              <div><label for="currency">幣別</label><select id="currency"><option value="THB">泰銖 THB</option><option value="TWD">台幣 TWD</option></select></div>
+              <div><label for="payer" id="payerLabel">付款人</label><select id="payer" required></select></div>
+              <div><label for="method">付款方式</label><select id="method"><option>現金</option><option>信用卡</option><option>電子支付</option><option>其他</option></select></div>
+              <div class="full"><label for="note">備註</label><input id="note" maxlength="200" placeholder="例如：四人晚餐，含飲料"></div>
+            </div>
+            <div class="actions"><button id="addBtn" type="submit" class="btn primary">＋ 新增支出</button><button id="sample" type="button" class="btn secondary">填入範例</button></div>
+            <p class="note" id="entryStatus">連線中斷時先儲存在這台裝置，恢復連線後自動補傳。</p>
+          </form>
+        </section>
+        <section class="card section-gap"><h2>分類統計</h2><div id="categoryStats"></div></section>
+      </div>
+      <div>
+        <section class="card">
+          <div class="toolbar"><h2 style="margin:0">每日明細</h2><select id="filterCategory" aria-label="篩選分類"><option value="">全部分類</option></select></div>
+          <div class="days" id="dayButtons" aria-label="行程日"></div>
+          <div class="itinerary" id="itinerary"></div>
+          <div class="list" id="expenseList"></div>
+          <div class="actions">
+            <button type="button" class="btn secondary" id="export">匯出 CSV 備份</button>
+            <button type="button" class="btn secondary" id="import">匯入 CSV 備份</button>
+            <input id="csvFile" type="file" accept=".csv,text/csv" hidden>
+          </div>
+          <p class="note">刪除的紀錄會從網站隱藏，Google Sheet 會保留原始資料及刪除時間。</p>
+        </section>
+        <section class="card section-gap">
+          <h2>匯率設定</h2>
+          <form id="rateForm" class="form">
+            <div><label for="rate">1 泰銖 ≈ 幾元台幣</label><input id="rate" type="number" min="0.0001" max="100" step="0.0001" required></div>
+            <div class="actions"><button type="submit" class="btn secondary" id="saveRate">儲存匯率</button></div>
+          </form>
+          <p class="note">匯率由四人共用，更新後會重算歷史紀錄的換算值。</p>
+        </section>
+      </div>
+    </div>
+  </main>
+  <div id="toast" class="toast" role="status"></div>
+</body>
+</html>
