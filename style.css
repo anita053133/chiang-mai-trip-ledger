@@ -71,6 +71,9 @@ label{font-size:14px}
 .amount .btn{display:block;margin:5px 0 0 auto}
 .itinerary small{font-size:14px}
 .entry-day{margin-bottom:11px}
+.person-dialog{width:min(400px,calc(100% - 32px));color:inherit}
+.person-dialog::backdrop{background:rgba(18,60,105,.35)}
+.person-dialog .actions{justify-content:flex-end}
 .syncbox button{white-space:nowrap}
 .negative{color:#b43b30!important}
 @media(max-width:520px){

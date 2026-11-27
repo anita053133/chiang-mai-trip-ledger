@@ -22,7 +22,7 @@
       </div>
       <button type="button" class="btn secondary" id="refresh">重新整理</button>
     </section>
-    <p class="note">四位旅伴可用同一條邀請連結開啟帳本。個人帳可依付款人查看。</p>
+    <p class="note">四位旅伴共用同一條邀請連結。進入個人帳時，請先確認記帳人。</p>
     <div class="scope" aria-label="帳本">
       <button type="button" class="btn secondary" id="publicScope" aria-pressed="true">公款</button>
       <button type="button" class="btn secondary" id="personalScope" aria-pressed="false">個人</button>
@@ -30,7 +30,7 @@
     <section class="card">
       <div class="toolbar">
         <h2 style="margin:0" id="summaryTitle">公款支出總覽</h2>
-        <div id="memberFilter" hidden><label for="ledgerMember">查看個人帳</label><select id="ledgerMember"></select></div>
+        <button type="button" class="btn secondary" id="changePersonalMember" hidden>更改記帳人</button>
       </div>
       <div class="summary">
         <div class="metric">總支出（泰銖）<b id="sumThb">฿0</b></div>
@@ -99,6 +99,18 @@
       </div>
     </div>
   </main>
+  <dialog id="personalDialog" class="card person-dialog" aria-labelledby="personalDialogTitle" aria-describedby="personalDialogNote">
+    <form id="personalConfirmation">
+      <h2 id="personalDialogTitle">確認個人記帳人</h2>
+      <label for="personalMember">我是</label>
+      <select id="personalMember" required></select>
+      <p class="note" id="personalDialogNote">請選擇自己的名字。</p>
+      <div class="actions">
+        <button type="button" class="btn secondary" id="cancelPersonal">取消</button>
+        <button type="submit" class="btn primary" id="confirmPersonal" disabled>確認</button>
+      </div>
+    </form>
+  </dialog>
   <div id="toast" class="toast" role="status"></div>
 </body>
 </html>

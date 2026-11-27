@@ -1,4 +1,4 @@
-const CACHE = 'chiang-mai-2026-shell-v1';
+const CACHE = 'chiang-mai-2026-shell-v2';
 const SHELL = ['./index.html', './style.css', './app.js', './config.js'];
 
 self.addEventListener('install', event => {
