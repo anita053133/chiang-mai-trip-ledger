@@ -14,7 +14,6 @@ const readLocal = (name, fallback) => {
 const writeLocal = (name, value) => localStorage.setItem(tripStorage + name, JSON.stringify(value));
 const clientId = readLocal('client', null) || crypto.randomUUID();
 const preferredMember = readLocal('member', '');
-const preferredPersonalMember = readLocal('personalMember', '');
 const storedDay = Number(readLocal('day', 1));
 const dateInChiangMai = new Intl.DateTimeFormat('en-CA', {
   timeZone: 'Asia/Bangkok', month: '2-digit', day: '2-digit',
@@ -23,8 +22,6 @@ const nowIndex = dates.findIndex(date => date.startsWith(dateInChiangMai));
 
 let activeDay = nowIndex >= 0 && readLocal('day', null) === null ? nowIndex + 1 : Math.min(8, Math.max(1, storedDay || 1));
 let scope = 'public';
-let publicPayer = members.includes(preferredMember) ? preferredMember : '';
-let personalMember = members.includes(preferredPersonalMember) ? preferredPersonalMember : '';
 let state = configured ? readLocal('cache', {}) : {};
 let rate = Number(state.rate) || 1;
 let syncTask;
@@ -43,13 +40,13 @@ categories.forEach(category => {
   el('category').append(makeOption(category));
   el('filterCategory').append(makeOption(category));
 });
-el('personalMember').append(makeOption('選擇自己的名字', ''));
+el('ledgerMember').append(makeOption('全部成員', ''));
 el('payer').append(makeOption('選擇成員', ''));
 members.forEach(member => {
-  el('personalMember').append(makeOption(member));
+  el('ledgerMember').append(makeOption(member));
   el('payer').append(makeOption(member));
 });
-el('payer').value = publicPayer;
+el('payer').value = members.includes(preferredMember) ? preferredMember : '';
 el('day').value = String(activeDay);
 el('rate').value = String(rate);
 
@@ -228,44 +225,16 @@ function synchronize(manual = false) {
 }
 
 function selectScope(next) {
-  if (scope === 'public') publicPayer = el('payer').value;
   scope = next;
   el('publicScope').setAttribute('aria-pressed', String(scope === 'public'));
   el('personalScope').setAttribute('aria-pressed', String(scope === 'personal'));
   el('fundCard').hidden = scope === 'personal';
-  el('changePersonalMember').hidden = scope === 'public';
+  el('memberFilter').hidden = scope === 'public';
   el('kind').disabled = scope === 'personal';
   el('kind').value = 'expense';
-  el('payer').disabled = scope === 'personal';
-  el('payer').value = scope === 'personal' ? personalMember : publicPayer;
+  if (scope === 'personal') el('ledgerMember').value = el('payer').value;
   updateKind();
   render();
-}
-
-function updatePersonalConfirmation() {
-  const selected = el('personalMember').value;
-  const valid = members.includes(selected);
-  el('confirmPersonal').disabled = !valid;
-  el('confirmPersonal').textContent = valid ? '確認，我是 ' + selected : '確認';
-  el('personalDialogNote').textContent = valid
-    ? '這次的個人支出會記在 ' + selected + ' 名下。'
-    : '請選擇自己的名字。';
-}
-
-function askPersonalMember() {
-  el('personalMember').value = personalMember;
-  updatePersonalConfirmation();
-  el('personalDialog').showModal();
-}
-
-function confirmPersonalMember(event) {
-  event.preventDefault();
-  const selected = el('personalMember').value;
-  if (!members.includes(selected)) return;
-  personalMember = selected;
-  try { writeLocal('personalMember', personalMember); } catch {}
-  selectScope('personal');
-  el('personalDialog').close();
 }
 
 function updateKind() {
@@ -289,15 +258,13 @@ function addExpense(event) {
     id: crypto.randomUUID(), created_at: new Date().toISOString(),
     day: Number(el('day').value), scope, kind, category: kind === 'expense' ? el('category').value : '',
     title, amount: Number(el('amount').value), currency: el('currency').value,
-    payer: scope === 'personal' ? personalMember : el('payer').value,
-    method: el('method').value, note: el('note').value.trim(), client_id: clientId,
+    payer: el('payer').value, method: el('method').value, note: el('note').value.trim(), client_id: clientId,
   };
   if (!isValidRecord(record)) return toast('請確認項目、金額及付款／投入人');
   try { queueEntries([record]); }
   catch { return toast('裝置的暫存空間無法寫入，這筆紀錄尚未儲存'); }
-  if (scope === 'public') {
-    try { writeLocal('member', record.payer); } catch {}
-  }
+  try { writeLocal('member', record.payer); } catch {}
+  if (scope === 'personal') el('ledgerMember').value = record.payer;
   setDay(record.day);
   for (const id of ['title', 'amount', 'note']) el(id).value = '';
   if (!navigator.onLine) toast('已暫存，恢復連線後會自動補傳');
@@ -389,7 +356,8 @@ function allRows() {
 }
 
 function currentRows() {
-  return allRows().filter(row => row.scope === scope && (scope === 'public' || row.payer === personalMember));
+  const person = el('ledgerMember').value;
+  return allRows().filter(row => row.scope === scope && (scope === 'public' || !person || row.payer === person));
 }
 
 function textNode(tag, value, className) {
@@ -406,7 +374,8 @@ function render() {
   const rows = currentRows();
   const expenseRows = rows.filter(row => row.kind === 'expense');
   const total = sum(expenseRows, asThb);
-  el('summaryTitle').textContent = scope === 'public' ? '公款支出總覽' : personalMember + ' 的個人支出總覽';
+  const person = el('ledgerMember').value;
+  el('summaryTitle').textContent = scope === 'public' ? '公款支出總覽' : (person ? person + ' 的' : '') + '個人支出總覽';
   el('sumThb').textContent = thb(total);
   el('sumTwd').textContent = twd(sum(expenseRows, asTwd));
   el('count').textContent = String(expenseRows.length);
@@ -546,9 +515,6 @@ async function importCSV(event) {
     if (!rows.length) throw new Error('CSV 沒有可匯入的資料');
     const invalidRow = rows.findIndex(row => !isValidRecord(row));
     if (invalidRow >= 0) throw new Error('第 ' + (invalidRow + 1) + ' 筆資料的欄位值不正確');
-    if (rows.some(row => row.scope === 'personal' && (scope !== 'personal' || row.payer !== personalMember))) {
-      throw new Error('請先確認個人記帳人，再匯入自己的個人帳 CSV');
-    }
     if (!confirm('將 ' + rows.length + ' 筆紀錄匯入清邁帳本。重複 ID 會自動略過。')) return;
     const known = new Set(allRows().map(row => row.id));
     queueEntries(rows.filter(row => !known.has(row.id)));
@@ -560,11 +526,8 @@ async function importCSV(event) {
 }
 
 el('publicScope').addEventListener('click', () => selectScope('public'));
-el('personalScope').addEventListener('click', askPersonalMember);
-el('changePersonalMember').addEventListener('click', askPersonalMember);
-el('personalMember').addEventListener('change', updatePersonalConfirmation);
-el('personalConfirmation').addEventListener('submit', confirmPersonalMember);
-el('cancelPersonal').addEventListener('click', () => el('personalDialog').close());
+el('personalScope').addEventListener('click', () => selectScope('personal'));
+el('ledgerMember').addEventListener('change', render);
 el('filterCategory').addEventListener('change', render);
 el('day').addEventListener('change', () => setDay(Number(el('day').value)));
 el('kind').addEventListener('change', updateKind);
