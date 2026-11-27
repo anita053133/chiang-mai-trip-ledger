@@ -1,5 +1,5 @@
-const CACHE = 'chiang-mai-2026-shell-v3';
-const SHELL = ['./index.html', './style-v2.css', './app-v2.js', './config.js'];
+const CACHE = 'chiang-mai-2026-shell-v4';
+const SHELL = ['./index.html', './style-v3.css', './app-v3.js', './config.js'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)));

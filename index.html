@@ -7,9 +7,9 @@
   <meta name="robots" content="noindex,nofollow">
   <meta name="referrer" content="no-referrer">
   <title>清邁八天七夜｜旅行記帳</title>
-  <link rel="stylesheet" href="./style-v2.css">
+  <link rel="stylesheet" href="./style-v3.css">
   <script src="./config.js" defer></script>
-  <script src="./app-v2.js" defer></script>
+  <script src="./app-v3.js" defer></script>
 </head>
 <body>
   <header><h1>🌿 清邁八天七夜｜旅行記帳</h1><p>2026/11/28－12/05・四人共用雲端版</p></header>
@@ -22,7 +22,7 @@
       </div>
       <button type="button" class="btn secondary" id="refresh">重新整理</button>
     </section>
-    <p class="note">四位旅伴共用同一條邀請連結。進入個人帳時，請先確認記帳人。</p>
+    <p class="note">四位旅伴共用同一條邀請連結。每台裝置第一次進入個人帳時，請確認記帳人。</p>
     <div class="scope" aria-label="帳本">
       <button type="button" class="btn secondary" id="publicScope" aria-pressed="true">公款</button>
       <button type="button" class="btn secondary" id="personalScope" aria-pressed="false">個人</button>
@@ -55,11 +55,13 @@
     </section>
     <div class="grid section-gap">
       <div>
-        <section class="card">
+        <section class="card" aria-label="當天行程">
+          <div class="entry-day"><label for="day">日期／行程日</label><select id="day" form="entry" required></select></div>
+          <div class="itinerary" id="itinerary" aria-live="polite"></div>
+        </section>
+        <section class="card section-gap">
           <h2 id="entryTitle">新增公款支出</h2>
           <form id="entry">
-            <div class="entry-day"><label for="day">日期／行程日</label><select id="day" required></select></div>
-            <div class="itinerary" id="itinerary" aria-live="polite"></div>
             <div class="form">
               <div><label for="kind">類型</label><select id="kind"><option value="expense">支出</option><option value="initial">初始投入</option><option value="topup">追加公款</option></select></div>
               <div id="categoryField"><label for="category">分類</label><select id="category"></select></div>
